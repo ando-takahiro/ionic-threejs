@@ -4,6 +4,7 @@ angular.module('starter.controllers', [])
 })
 
 .directive('teapotView', function() {
+  var stats;
   var camera, scene, sceneCube, renderer;
   var cameraControls;
   var effectController;
@@ -209,6 +210,13 @@ angular.module('starter.controllers', [])
 
   }
 
+  function animate() {
+    requestAnimationFrame( animate );
+
+    //render();
+    stats.update();
+  }
+
   // Whenever the teapot changes, the scene is rebuilt from scratch (not much to it).
   function createNewTeapot() {
 
@@ -326,10 +334,17 @@ angular.module('starter.controllers', [])
       scene.add( ambientLight );
       scene.add( light );
 
+      // stats
+      stats = new Stats();
+      stats.domElement.style.position = 'absolute';
+      stats.domElement.style.top = '0px';
+      element.append( stats.domElement );
+
       // GUI
       setupGui();
 
       render();
+      animate();
     }
   };
 })
