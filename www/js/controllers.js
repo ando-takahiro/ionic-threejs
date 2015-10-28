@@ -334,6 +334,16 @@ angular.module('starter.controllers', [])
       scene.add( ambientLight );
       scene.add( light );
 
+      var fullscreen = false;
+      element.on('click', function () {
+        if (fullscreen) {
+          document.webkitCancelFullScreen();
+        } else {
+          element[0].webkitRequestFullScreen();
+        }
+        fullscreen = !fullscreen;
+      });
+
       // stats
       stats = new Stats();
       stats.domElement.style.position = 'absolute';
