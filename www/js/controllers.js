@@ -1,9 +1,9 @@
-angular.module('starter.controllers', [])
+angular.module('starter.controllers', ['ionic'])
 
 .controller('TeapotCtrl', function($scope) {
 })
 
-.directive('teapotView', function() {
+.directive('teapotView', ['$ionicGesture', '$ionicNavBarDelegate', function (ionicGesture, ionicNavBarDelegate) {
   var stats;
   var camera, scene, sceneCube, renderer;
   var effect;
@@ -357,20 +357,48 @@ angular.module('starter.controllers', [])
 
       // tap to fullscreen
       var fullscreen = false;
-      element.on('click', function () {
+      scope.toggleFullScreen = function toggleFullScreen() {
+        console.log('toggleFullScreen:', fullscreen);
+        var tabs = angular.element(document.querySelector('ion-tabs'));
+        //var navbar = angular.element(document.querySelector('ion-nav-view'));
         if (fullscreen) {
-          document.webkitCancelFullScreen();
+          /*if (document.webkitCancelFullScreen) {
+            console.log('cancelFullScreen');
+            document.webkitCancelFullScreen();
+            }*/
+          tabs.removeClass('tabs-item-hide');
+          //navbar.css('visibility', 'visible');
+          //navbar.attr('hide-nav-bar', 'false');
+          ionicNavBarDelegate.showBar(true);
         } else {
-          element[0].webkitRequestFullScreen();
+          tabs.addClass('tabs-item-hide');
+          //navbar.css('visibility', 'hidden');
+          //navbar.attr('hide-nav-bar', 'true');
+          ionicNavBarDelegate.showBar(false);
+          /*
+          var elem = element[0];
+          if (elem.requestFullscreen) {
+            console.log('requestFullScreen');
+            elem.requestFullscreen();
+          }
+          else if (elem.mozRequestFullScreen) {
+            console.log('mozRequestFullScreen');
+            elem.mozRequestFullScreen();
+          }
+          else if (elem.webkitRequestFullScreen) {
+            console.log('webkitRequestFullScreen');
+            elem.webkitRequestFullScreen();
+          }
+          else if (elem.msRequestFullscreen) {
+            console.log('msRequestFullScreen');
+            elem.msRequestFullscreen();
+            }*/
         }
         fullscreen = !fullscreen;
-      });
-
-      // orientation
-
+      };
     }
   };
-})
+}])
 
 .controller('ChatsCtrl', function($scope, Chats) {
   // With the new view caching in Ionic, Controllers are only called
