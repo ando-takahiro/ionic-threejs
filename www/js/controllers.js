@@ -6,6 +6,7 @@ angular.module('starter.controllers', [])
 .directive('teapotView', function() {
   var stats;
   var camera, scene, sceneCube, renderer;
+  var effect;
   var cameraControls;
   var effectController;
   var teapotSize = 400;
@@ -26,6 +27,7 @@ angular.module('starter.controllers', [])
   // allocate these just once
   var diffuseColor = new THREE.Color();
   var specularColor = new THREE.Color();
+
   // EVENT HANDLERS
 
   function onWindowResize() {
@@ -33,10 +35,13 @@ angular.module('starter.controllers', [])
     var canvasWidth = window.innerWidth;
     var canvasHeight = window.innerHeight;
 
-    renderer.setSize( canvasWidth, canvasHeight );
+    //renderer.setSize( canvasWidth, canvasHeight );
 
     camera.aspect = canvasWidth / canvasHeight;
     camera.updateProjectionMatrix();
+
+    effect.eyeSeparation = 10;
+    effect.setSize( canvasWidth, canvasHeight );
 
     render();
 
@@ -136,85 +141,83 @@ angular.module('starter.controllers', [])
             effectController.body !== bBody ||
               effectController.fitLid !== bFitLid ||
                 effectController.nonblinn !== bNonBlinn ||
-                  effectController.newShading !== shading )
-      {
+                  effectController.newShading !== shading ) {
 
-        tess = effectController.newTess;
-        bBottom = effectController.bottom;
-        bLid = effectController.lid;
-        bBody = effectController.body;
-        bFitLid = effectController.fitLid;
-        bNonBlinn = effectController.nonblinn;
-        shading = effectController.newShading;
+      tess = effectController.newTess;
+      bBottom = effectController.bottom;
+      bLid = effectController.lid;
+      bBody = effectController.body;
+      bFitLid = effectController.fitLid;
+      bNonBlinn = effectController.nonblinn;
+      shading = effectController.newShading;
 
-        createNewTeapot();
+      createNewTeapot();
 
-      }
+    }
 
-      // We're a bit lazy here. We could check to see if any material attributes changed and update
-      // only if they have. But, these calls are cheap enough and this is just a demo.
-      phongMaterial.shininess = effectController.shininess;
-      texturedMaterial.shininess = effectController.shininess;
+    // We're a bit lazy here. We could check to see if any material attributes changed and update
+    // only if they have. But, these calls are cheap enough and this is just a demo.
+    phongMaterial.shininess = effectController.shininess;
+    texturedMaterial.shininess = effectController.shininess;
 
-      diffuseColor.setHSL( effectController.hue, effectController.saturation, effectController.lightness );
-      if ( effectController.metallic )
-        {
+    diffuseColor.setHSL( effectController.hue, effectController.saturation, effectController.lightness );
+    if ( effectController.metallic ) {
 
-          // make colors match to give a more metallic look
-          specularColor.copy( diffuseColor );
+      // make colors match to give a more metallic look
+      specularColor.copy( diffuseColor );
 
-        }
-        else
-          {
+    } else {
 
-            // more of a plastic look
-            specularColor.setRGB( 1, 1, 1 );
+      // more of a plastic look
+      specularColor.setRGB( 1, 1, 1 );
 
-          }
+    }
 
-          diffuseColor.multiplyScalar( effectController.kd );
-          flatMaterial.color.copy( diffuseColor );
-          gouraudMaterial.color.copy( diffuseColor );
-          phongMaterial.color.copy( diffuseColor );
-          texturedMaterial.color.copy( diffuseColor );
+    diffuseColor.multiplyScalar( effectController.kd );
+    flatMaterial.color.copy( diffuseColor );
+    gouraudMaterial.color.copy( diffuseColor );
+    phongMaterial.color.copy( diffuseColor );
+    texturedMaterial.color.copy( diffuseColor );
 
-          specularColor.multiplyScalar( effectController.ks );
-          phongMaterial.specular.copy( specularColor );
-          texturedMaterial.specular.copy( specularColor );
+    specularColor.multiplyScalar( effectController.ks );
+    phongMaterial.specular.copy( specularColor );
+    texturedMaterial.specular.copy( specularColor );
 
-          // Ambient's actually controlled by the light for this demo
-          ambientLight.color.setHSL( effectController.hue, effectController.saturation, effectController.lightness * effectController.ka );
+    // Ambient's actually controlled by the light for this demo
+    ambientLight.color.setHSL( effectController.hue, effectController.saturation, effectController.lightness * effectController.ka );
 
-          light.position.set( effectController.lx, effectController.ly, effectController.lz );
-          light.color.setHSL( effectController.lhue, effectController.lsaturation, effectController.llightness );
+    light.position.set( effectController.lx, effectController.ly, effectController.lz );
+    light.color.setHSL( effectController.lhue, effectController.lsaturation, effectController.llightness );
 
-          // skybox is rendered separately, so that it is always behind the teapot.
-          if ( shading === "reflective" )
-            {
+    /*
+    // skybox is rendered separately, so that it is always behind the teapot.
+    if ( shading === "reflective" ) {
 
-              // clear to skybox
-              renderer.autoClear = false;
-              skybox.position.copy( camera.position );
-              renderer.render( sceneCube, camera );
+      // clear to skybox
+      renderer.autoClear = false;
+      skybox.position.copy( camera.position );
+      //renderer.render( sceneCube, camera );
+      effect.render( sceneCube, camera );
 
-            }
-            else
-              {
+    } else {
 
-                // clear to regular background color
-                renderer.autoClear = true;
+      // clear to regular background color
+      renderer.autoClear = true;
 
-              }
+    }
+    */
 
-              renderer.render( scene, camera );
+    effect.render( scene, camera );
 
   }
 
   function animate() {
     requestAnimationFrame( animate );
 
-    //render();
+    cameraControls.update();
     stats.update();
+
+    render();
   }
 
   // Whenever the teapot changes, the scene is rebuilt from scratch (not much to it).
@@ -254,8 +257,8 @@ angular.module('starter.controllers', [])
       var canvasHeight = window.innerHeight;
 
       // CAMERA
-      camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 80000 );
-      camera.position.set( -600, 550, 1300 );
+      camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 80000 );
+      camera.position.set(0, 0, 1300);//( -600, 550, 1300 );
 
       // LIGHTS
       ambientLight = new THREE.AmbientLight( 0x333333 );	// 0.2
@@ -275,9 +278,10 @@ angular.module('starter.controllers', [])
       window.addEventListener( 'resize', onWindowResize, false );
 
       // CONTROLS
-      cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
-      cameraControls.target.set( 0, 0, 0 );
-      cameraControls.addEventListener( 'change', render );
+      //cameraControls = new THREE.OrbitControls( camera, renderer.domElement );
+      //cameraControls.target.set( 0, 0, 0 );
+      //cameraControls.addEventListener( 'change', render );
+      cameraControls = new THREE.DeviceOrientationControls( camera );
 
       // TEXTURE MAP
       var textureMap = THREE.ImageUtils.loadTexture( 'textures/UV_Grid_Sm.jpg' );
@@ -334,6 +338,24 @@ angular.module('starter.controllers', [])
       scene.add( ambientLight );
       scene.add( light );
 
+      // stats
+      stats = new Stats();
+      stats.domElement.style.position = 'absolute';
+      stats.domElement.style.top = '0px';
+      element.append( stats.domElement );
+
+      // STEREO EFFECT
+      effect = new THREE.StereoEffect( renderer );
+      //effect.eyeSeparation = 10;
+      effect.setSize( window.innerWidth, window.innerHeight );
+
+      // GUI
+      setupGui();
+
+      render();
+      animate();
+
+      // tap to fullscreen
       var fullscreen = false;
       element.on('click', function () {
         if (fullscreen) {
@@ -344,17 +366,8 @@ angular.module('starter.controllers', [])
         fullscreen = !fullscreen;
       });
 
-      // stats
-      stats = new Stats();
-      stats.domElement.style.position = 'absolute';
-      stats.domElement.style.top = '0px';
-      element.append( stats.domElement );
+      // orientation
 
-      // GUI
-      setupGui();
-
-      render();
-      animate();
     }
   };
 })
